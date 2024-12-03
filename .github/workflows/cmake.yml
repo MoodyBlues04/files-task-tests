@@ -1,0 +1,67 @@
+name: Samurai's Hello World Tests
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  check_formatting:
+    name: Code formatting check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download student repository
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Check formatting
+        uses: jidicula/clang-format-action@v4.11.0
+        with:
+          clang-format-version: '18'
+          check-path: '.'
+
+  buildtest:
+    needs: check_formatting
+
+    name: "Building and testing with ${{ matrix.toolchain.name }} (${{ matrix.buildtype }} configuration)"
+
+    strategy:
+        fail-fast: true
+
+        matrix:
+          toolchain:
+            - { name: Clang 18, compiler: clang-18 }
+            - { name: GCC 11,   compiler: gcc-11   }
+
+          buildtype:
+            - Release
+            - Debug
+            - RelWithDebInfo
+            - Sanitized
+            - ThreadSanitized
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Download student repository
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Install build tools
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: ${{ matrix.toolchain.compiler }}
+          ninja: true
+          cmake: true
+
+      - name: Fixup sanitizer(s)
+        run: sudo sysctl vm.mmap_rnd_bits=28
+
+      - name: Build solution
+        run: cmake -S . --preset "${{ matrix.buildtype }}" -G Ninja && cmake --build . -j
+
+      - name: Run hello
+        run: sudo ./hello

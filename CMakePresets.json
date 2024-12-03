@@ -1,0 +1,47 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 8,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "Release",
+            "description": "Default Release build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "Debug",
+            "description": "Default Debug build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "RelWithDebInfo",
+            "description": "Default RelWithDebInfo build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+            }
+        },
+        {
+            "name": "Sanitized",
+            "description": "Debug build with AddressSanitizer, LeakSanitizer and UndefinedBehaviorSanitizer enabled",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "USE_SANITIZER": "ON"
+            }
+        },
+        {
+            "name": "ThreadSanitized",
+            "description": "Debug build with ThreadSanitizer enabled",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "USE_THREAD_SANITIZER": "ON"
+            }
+        }
+    ]
+}

@@ -1,0 +1,31 @@
+name: Hello World Tests
+
+on:
+  push:
+  workflow_dispatch:
+
+env:
+  TASK: hello
+
+jobs:
+  buildtest:
+    name: BuildTest
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Download tests
+        uses: actions/checkout@v4
+        with:
+          repository: ITMO-OS-LITE/public-tests
+          ref: master
+
+      - name: Download student solutions
+        uses: actions/checkout@v4
+        with:
+          path: src
+          ref: master
+
+      - name: Test solution
+        run: python3 tmain.py --suite ${{ env.TASK }}
