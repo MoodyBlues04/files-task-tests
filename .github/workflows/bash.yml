@@ -1,11 +1,8 @@
-name: Hello World Tests
+name: Files Tests
 
 on:
   push:
   workflow_dispatch:
-
-env:
-  TASK: hello
 
 jobs:
   buildtest:
@@ -15,17 +12,71 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      - name: Download tests
-        uses: actions/checkout@v4
-        with:
-          repository: ITMO-OS-LITE/public-tests
-          ref: master
-
       - name: Download student solutions
         uses: actions/checkout@v4
-        with:
-          path: src
-          ref: master
 
-      - name: Test solution
-        run: python3 tmain.py --suite ${{ env.TASK }}
+      - name: Install required packages
+        run: sudo apt-get update && sudo apt-get install -y tree
+
+      - name: rmtrash.bash
+        run: |
+          names=("abc" "a c" "*" "***" "this is sparta" "normal_name")
+
+          for name in "${names[@]}"; do
+            touch "${name}"
+            echo "Generated file named \"${name}\"."
+          done
+
+          for name in "${names[@]}"; do
+            sudo bash rmtrash.bash "${name}"
+          done
+
+          for name in "${names[@]}"; do
+            if [ -f "${name}" ]; then
+              echo "File named \"${name}\" should not exists after removing."
+              exit 1
+            fi
+          done
+
+          cat ~/.trash.log
+
+      - name: backup.bash
+        run: |
+          mkdir -p ~/source
+
+          names=("abc" "a c" "*" "***" "this is sparta" "normal_name")
+          directories=("folder1" "fold er2")
+
+          for name in "${names[@]}"; do
+            touch "~/source/${name}"
+            echo "Generated file named \"${name}\"."
+            for directory in "${directories[@]}"; do
+              mkdir -p ~/source/"${directory}"
+              touch "~/source/${directory}/${name}"
+              echo "Generated file named \"${name}\" in \"${directory}\"."
+            done
+          done
+
+          sudo bash backup.bash
+          cat ~/backup-report
+
+          new_names=("abc2" "a c2" "*2" "***2" "this is sparta2" "normal_name2")
+          new_directories=("folder1 2" "fold er2 2")
+
+          for name in "${new_names[@]}"; do
+            touch "~/source/${name}"
+            echo "Generated file named \"${name}\"."
+            for directory in "${new_directories[@]}"; do
+              mkdir -p ~/source/"${directory}"
+              touch "~/source/${directory}/${name}"
+              echo "Generated file named \"${name}\" in \"${directory}\"."
+            done
+          done
+
+          sudo bash backup.bash
+          cat ~/backup-report
+
+      - name: upback.bash
+        run: |
+          sudo bash upback.bash
+          tree ~/restore/
