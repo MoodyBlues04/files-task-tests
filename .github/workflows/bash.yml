@@ -28,7 +28,25 @@ jobs:
           done
 
           for name in "${names[@]}"; do
-            sudo bash rmtrash.bash "${name}"
+            bash rmtrash.bash "${name}"
+          done
+
+          for name in "${names[@]}"; do
+            if [ -f "${name}" ]; then
+              echo "File named \"${name}\" should not exists after removing."
+              exit 1
+            fi
+          done
+
+          cat ~/.trash.log
+
+          for name in "${names[@]}"; do
+            touch "${name}"
+            echo "Generated file named \"${name}\"."
+          done
+
+          for name in "${names[@]}"; do
+            bash rmtrash.bash "${name}"
           done
 
           for name in "${names[@]}"; do
@@ -48,35 +66,35 @@ jobs:
           directories=("folder1" "fold er2")
 
           for name in "${names[@]}"; do
-            touch "~/source/${name}"
+            touch ~/source/"${name}"
             echo "Generated file named \"${name}\"."
             for directory in "${directories[@]}"; do
               mkdir -p ~/source/"${directory}"
-              touch "~/source/${directory}/${name}"
+              touch ~/source/"${directory}"/"${name}"
               echo "Generated file named \"${name}\" in \"${directory}\"."
             done
           done
 
-          sudo bash backup.bash
+          bash backup.bash
           cat ~/backup-report
 
           new_names=("abc2" "a c2" "*2" "***2" "this is sparta2" "normal_name2")
           new_directories=("folder1 2" "fold er2 2")
 
           for name in "${new_names[@]}"; do
-            touch "~/source/${name}"
+            touch ~/source/"${name}"
             echo "Generated file named \"${name}\"."
             for directory in "${new_directories[@]}"; do
               mkdir -p ~/source/"${directory}"
-              touch "~/source/${directory}/${name}"
+              touch ~/source/"${directory}"/"${name}"
               echo "Generated file named \"${name}\" in \"${directory}\"."
             done
           done
 
-          sudo bash backup.bash
+          bash backup.bash
           cat ~/backup-report
 
       - name: upback.bash
         run: |
-          sudo bash upback.bash
+          bash upback.bash
           tree ~/restore/
