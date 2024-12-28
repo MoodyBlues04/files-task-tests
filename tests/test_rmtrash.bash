@@ -1,5 +1,9 @@
 #!/usr/bin/bash
 
+TRASH_DIR=~/.trash
+TRASH_LOG=~/.trash.log
+FILES=("abc" "a c" "*" "***" "this is sparta" "normal_name" "   ")
+
 fail_with() {
     msg="$1"
     echo -e "\e[31m$msg\e[0m"
@@ -24,10 +28,6 @@ rm_files() {
     done
 }
 
-TRASH_DIR=~/.trash
-TRASH_LOG=~/.trash.log
-FILES=("abc" "a c" "*" "***" "this is sparta" "normal_name" "   ")
-
 test_positive() {
     make_files
     for name in "${FILES[@]}"; do
@@ -38,8 +38,9 @@ test_positive() {
         if [ -f "$name" ]; then
             fail_with "File named '$name' should not exists after removing."
         fi
-        if [[ -z $(find $TRASH_DIR -maxdepth 1 -type f -name "*$name*" -print -quit) ]]; then
-            fail_with "File named '$name' should be in .trash dir."
+        trash_dir_files_cnt=$(find $TRASH_DIR -maxdepth 1 -type f | wc -l)
+        if (( "${#FILES[@]}" != trash_dir_files_cnt )); then
+            fail_with "Trash dir contains: $trash_dir_files_cnt files, expected: ${#FILES[@]}"
         fi
     done
 

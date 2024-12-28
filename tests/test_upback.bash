@@ -1,5 +1,11 @@
 #!/usr/bin/bash
 
+RESTORE_DIR="$HOME/restore"
+BACKUP_DIR="$HOME/Backup-2024-10-10"
+DIRS=("tmp/tmp/tmp/tmp" "tmp1/tmp1/tmp1" "tmp1" "tmp/tmp" "*/*/*" "**/*" "*/     /*")
+FILES=("abc" "a c" "*" "***" "this is sparta" "normal_name" "   ")
+BAD_FILES=("3123123.2024-01-01" "   .2024-01-01" "**.2024-01-01" "this is this.2024-01-01" "name_name.2024-01-01")
+
 fail_with() {
     msg="$1"
     echo -e "\e[31m$msg\e[0m"
@@ -12,12 +18,6 @@ assert_exit_code() {
         fail_with "Expected '$expected' return code. Got: '$actual'"
     fi
 }
-
-RESTORE_DIR="$HOME/restore"
-BACKUP_DIR="$HOME/Backup-2024-10-10"
-DIRS=("tmp/tmp/tmp/tmp" "tmp1/tmp1/tmp1" "tmp1" "tmp/tmp")
-FILES=("abc" "a c" "*" "***" "this is sparta" "normal_name" "   ")
-BAD_FILES=("3123123.2024-01-01" "   .2024-01-01" "**.2024-01-01" "this is this.2024-01-01" "name_name.2024-01-01")
 
 prepare() {
     rm -rf "$RESTORE_DIR"

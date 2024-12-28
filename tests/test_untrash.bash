@@ -1,5 +1,10 @@
 #!/usr/bin/bash
 
+TMP_DIR=~/.tmp
+TRASH_DIR=~/.trash
+TRASH_LOG=~/.trash.log
+FILES=("abc" "a c" "*" "***" "this is sparta" "normal_name" "   ")
+
 fail_with() {
     msg="$1"
     echo -e "\e[31m$msg\e[0m"
@@ -32,12 +37,6 @@ put_to_trash() {
     ((files_cnt++))
 }
 
-TMP_DIR=~/.tmp
-TRASH_DIR=~/.trash
-TRASH_LOG=~/.trash.log
-FILES=("abc" "a c" "*" "***" "this is sparta" "normal_name" "   ")
-# FILES=("with_version(2).ext" "abc" "a c" "*" "***" "this is sparta" "normal_name" "  ") #todo with ext
-
 test_positive_no_conflict() {
     for name in "${FILES[@]}"; do
         put_to_trash "$name"
@@ -46,7 +45,8 @@ test_positive_no_conflict() {
         if [ ! -f $TMP_DIR"/$name" ]; then
             fail_with "File named '$name' doesnt appear after untrash."
         fi
-        if [[ -n $(find $TRASH_DIR -maxdepth 1 -type f -name "*$name*" -print -quit) ]]; then
+        trash_dir_files_cnt=$(find $TRASH_DIR -maxdepth 1 -type f | wc -l)
+        if ((0 != trash_dir_files_cnt)); then
             fail_with "File named '$name' should be removed from .trash after untrash."
         fi
         log_line=$(tail -n 1 $TRASH_LOG)
@@ -66,7 +66,8 @@ test_positive_no_conflict_restore_at_home() {
             fail_with "File named '$name' doesnt appear after untrash."
         fi
         rm "$HOME/$name" # not to keep waste
-        if [[ -n $(find $TRASH_DIR -maxdepth 1 -type f -name "*$name*" -print -quit) ]]; then
+        trash_dir_files_cnt=$(find $TRASH_DIR -maxdepth 1 -type f | wc -l)
+        if ((0 != trash_dir_files_cnt)); then
             fail_with "File named '$name' should be removed from .trash after untrash."
         fi
         log_line=$(tail -n 1 $TRASH_LOG)
@@ -97,7 +98,8 @@ test_positive_with_conflict_ignore() {
         if [[ "$timestamp" != $(cat $TMP_DIR"/$name") ]]; then
             fail_with "File must not be replaced when --ignore option enabled. File: '$name'."
         fi
-        if [[ -n $(find $TRASH_DIR -maxdepth 1 -type f -name "*$name*" -print -quit) ]]; then
+        trash_dir_files_cnt=$(find $TRASH_DIR -maxdepth 1 -type f | wc -l)
+        if ((0 != trash_dir_files_cnt)); then
             fail_with "File named '$name' should be removed from .trash after untrash."
         fi
         log_line=$(tail -n 1 $TRASH_LOG)
@@ -120,7 +122,8 @@ test_positive_with_conflict_overwrite() {
         if [[ "$timestamp" == $(cat $TMP_DIR"/$name") ]]; then
             fail_with "File must be replaced when --overwrite option enabled. File: '$name'."
         fi
-        if [[ -n $(find $TRASH_DIR -maxdepth 1 -type f -name "*$name*" -print -quit) ]]; then
+        trash_dir_files_cnt=$(find $TRASH_DIR -maxdepth 1 -type f | wc -l)
+        if ((0 != trash_dir_files_cnt)); then
             fail_with "File named '$name' should be removed from .trash after untrash."
         fi
         log_line=$(tail -n 1 $TRASH_LOG)
@@ -143,7 +146,8 @@ test_positive_with_conflict_unique() {
         if [[ "$timestamp" != $(cat $TMP_DIR"/$name") ]]; then
             fail_with "File must not be replaced when --unique option enabled. File: '$name'."
         fi
-        if [[ -n $(find $TRASH_DIR -maxdepth 1 -type f -name "*$name*" -print -quit) ]]; then
+        trash_dir_files_cnt=$(find $TRASH_DIR -maxdepth 1 -type f | wc -l)
+        if ((0 != trash_dir_files_cnt)); then
             fail_with "File named '$name' should be removed from .trash after untrash."
         fi
         log_line=$(tail -n 1 $TRASH_LOG)

@@ -1,5 +1,11 @@
 #!/usr/bin/bash
 
+SOURCE_DIR="$HOME/source"
+REPORT_FILE="$HOME/backup-report"
+
+DIRS=("tmp/tmp/tmp/tmp" "tmp1/tmp1/tmp1" "tmp1" "tmp/tmp" "**/*" "*/   /*")
+FILES=("abc" "a c" "*" "***" "this is sparta" "normal_name" "   ")
+
 fail_with() {
     msg="$1"
     echo -e "\e[31m$msg\e[0m"
@@ -16,12 +22,6 @@ escape_string() {
     str="$1"
     echo "${str//[\.\^\$\*\+\?\(\)\[\]\{\}\|\\\\]/\\&}"
 }
-
-SOURCE_DIR="$HOME/source"
-REPORT_FILE="$HOME/backup-report"
-
-DIRS=("tmp/tmp/tmp/tmp" "tmp1/tmp1/tmp1" "tmp1" "tmp/tmp")
-FILES=("abc" "a c" "*" "***" "this is sparta" "normal_name" "   ")
 
 prepare() {
     :> "$REPORT_FILE"
@@ -85,7 +85,7 @@ test_positive_update_backup_only_new_files() {
         fail_with "Backup dir not created."
     fi
     
-    extra_files=("tmp/tmp/12345" "tmp/1234" "tmp1/tmp1/abc")
+    extra_files=("tmp/tmp/12345" "tmp/1234" "tmp1/tmp1/abc" "**/*/abcabc" "*/   /*/abc")
     for file_name in "${extra_files[@]}"; do
         mkdir -p "$( dirname "$SOURCE_DIR/$file_name" )"
         touch "$SOURCE_DIR/$file_name"
