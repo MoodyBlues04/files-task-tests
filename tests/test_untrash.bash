@@ -22,6 +22,11 @@ get_filename_version() {
     echo "$filename" | grep -o -P "\\([0-9]+\\)((\\.[a-zA-Z]+)+)?$" | grep -o -P "[0-9]+"
 }
 
+count_logs() {
+    str="$1"
+    cat $TRASH_LOG | grep -c "$str"
+}
+
 prepare() {
     rm -rf $TRASH_DIR
     mkdir $TRASH_DIR
@@ -40,6 +45,7 @@ put_to_trash() {
 test_positive_no_conflict() {
     for name in "${FILES[@]}"; do
         put_to_trash "$name"
+        old_logs_cnt=$(count_logs "$name")
         bash untrash.bash "$name" <<< Y
         assert_exit_code 0
         if [ ! -f $TMP_DIR"/$name" ]; then
@@ -49,8 +55,8 @@ test_positive_no_conflict() {
         if ((0 != trash_dir_files_cnt)); then
             fail_with "File named '$name' should be removed from .trash after untrash."
         fi
-        log_line=$(tail -n 1 $TRASH_LOG)
-        if [[ "$log_line" == "*$name*" ]]; then
+        new_logs_cnt=$(count_logs "$name")
+        if ((new_logs_cnt != old_logs_cnt - 1)); then
             fail_with "Log file must not contain untrashed file '$name'."
         fi
     done
@@ -60,6 +66,7 @@ test_positive_no_conflict_restore_at_home() {
     rm -rf $TMP_DIR
     for name in "${FILES[@]}"; do
         put_to_trash "$name"
+        old_logs_cnt=$(count_logs "$name")
         bash untrash.bash "$name" <<< Y
         assert_exit_code 0
         if [ ! -f "$HOME/$name" ]; then
@@ -70,8 +77,8 @@ test_positive_no_conflict_restore_at_home() {
         if ((0 != trash_dir_files_cnt)); then
             fail_with "File named '$name' should be removed from .trash after untrash."
         fi
-        log_line=$(tail -n 1 $TRASH_LOG)
-        if [[ "$log_line" == "*$name*" ]]; then
+        new_logs_cnt=$(count_logs "$name")
+        if ((new_logs_cnt != old_logs_cnt - 1)); then
             fail_with "Log file must not contain untrashed file '$name'."
         fi
     done
@@ -88,6 +95,7 @@ test_positive_same_names() {
 test_positive_with_conflict_ignore() {
     for name in "${FILES[@]}"; do
         put_to_trash "$name"
+        old_logs_cnt=$(count_logs "$name")
         timestamp=$(date +%s)
         echo "$timestamp" > $TMP_DIR"/$name" # to ensure, that file wasnt replaced
         bash untrash.bash -i "$name" <<< Y
@@ -102,8 +110,8 @@ test_positive_with_conflict_ignore() {
         if ((0 != trash_dir_files_cnt)); then
             fail_with "File named '$name' should be removed from .trash after untrash."
         fi
-        log_line=$(tail -n 1 $TRASH_LOG)
-        if [[ "$log_line" == "*$name*" ]]; then
+        new_logs_cnt=$(count_logs "$name")
+        if ((new_logs_cnt != old_logs_cnt - 1)); then
             fail_with "Log file must not contain untrashed file '$name'."
         fi
     done
@@ -112,6 +120,7 @@ test_positive_with_conflict_ignore() {
 test_positive_with_conflict_overwrite() {
     for name in "${FILES[@]}"; do
         put_to_trash "$name"
+        old_logs_cnt=$(count_logs "$name")
         timestamp=$(date +%s)
         echo "$timestamp" > $TMP_DIR"/$name" # to ensure, that file was replaced
         bash untrash.bash -o "$name" <<< Y
@@ -126,8 +135,8 @@ test_positive_with_conflict_overwrite() {
         if ((0 != trash_dir_files_cnt)); then
             fail_with "File named '$name' should be removed from .trash after untrash."
         fi
-        log_line=$(tail -n 1 $TRASH_LOG)
-        if [[ "$log_line" == "*$name*" ]]; then
+        new_logs_cnt=$(count_logs "$name")
+        if ((new_logs_cnt != old_logs_cnt - 1)); then
             fail_with "Log file must not contain untrashed file '$name'."
         fi
     done
@@ -136,6 +145,7 @@ test_positive_with_conflict_overwrite() {
 test_positive_with_conflict_unique() {
     for name in "${FILES[@]}"; do
         put_to_trash "$name"
+        old_logs_cnt=$(count_logs "$name")
         timestamp=$(date +%s)
         echo "$timestamp" > $TMP_DIR"/$name" # to ensure, that file wasnt replaced
         bash untrash.bash -u "$name" <<< Y
@@ -150,8 +160,8 @@ test_positive_with_conflict_unique() {
         if ((0 != trash_dir_files_cnt)); then
             fail_with "File named '$name' should be removed from .trash after untrash."
         fi
-        log_line=$(tail -n 1 $TRASH_LOG)
-        if [[ "$log_line" == "*$name*" ]]; then
+        new_logs_cnt=$(count_logs "$name")
+        if ((new_logs_cnt != old_logs_cnt - 1)); then
             fail_with "Log file must not contain untrashed file '$name'."
         fi
 

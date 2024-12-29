@@ -21,8 +21,7 @@ assert_exit_code() {
 
 prepare() {
     rm -rf "$RESTORE_DIR"
-    # mkdir "$RESTORE_DIR"
-    rm -rf "$BACKUP_DIR"
+    rm -rf Backup-* # remove all backups
     mkdir "$BACKUP_DIR"
     for dir_name in "${DIRS[@]}"; do
         mkdir -p "$BACKUP_DIR/$dir_name"
