@@ -199,7 +199,9 @@ test_negative_file_not_in_trash_log() {
 test_negative_file_not_in_trash_dir() {
     for name in "${FILES[@]}"; do
         put_to_trash "$name"
-        rm $TRASH_DIR/*"$name"*
+        rm -rf $TRASH_DIR
+        mkdir $TRASH_DIR
+        
         bash untrash.bash "$name" <<< Y
         assert_exit_code 1
     done
